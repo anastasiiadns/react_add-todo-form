@@ -13,7 +13,12 @@ export const App: React.FC = () => {
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [hasUsersError, setHasUsersError] = useState(false);
 
-  const [todos, setTodos] = useState<Todo[]>(todosFromServer);
+  const [todos, setTodos] = useState<Todo[]>(
+    todosFromServer.map(todo => ({
+      ...todo,
+      user: usersFromServer.find(user => user.id === todo.userId)!,
+    })),
+  );
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -41,13 +46,15 @@ export const App: React.FC = () => {
 
     const maxId = todos.length ? Math.max(...todos.map(todo => todo.id)) : 0;
 
-    const selectedUser = usersFromServer.find(u => u.id === selectedUserId);
+    const selectedUser = usersFromServer.find(
+      u => u.id === Number(selectedUserId),
+    );
 
     if (!selectedUser) {
       return;
     }
 
-    const newTodo = {
+    const newTodo: Todo = {
       id: maxId + 1,
       title,
       completed: false,
@@ -102,7 +109,7 @@ export const App: React.FC = () => {
                 value={selectedUserId}
                 onChange={handleUsersChange}
               >
-                <option value="0" disabled>
+                <option value={0} disabled>
                   Choose a user
                 </option>
 
