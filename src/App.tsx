@@ -1,6 +1,7 @@
 import './App.scss';
-import { Todo, TodoList } from './components/TodoList';
+import { TodoList } from './components/TodoList';
 import React, { useState } from 'react';
+import { Todo } from './types/Todo';
 
 import usersFromServer from './api/users';
 import todosFromServer from './api/todos';
@@ -9,7 +10,7 @@ export const App: React.FC = () => {
   const [title, setTitle] = useState('');
   const [hasTitleError, setHasTitleError] = useState(false);
 
-  const [users, setUsers] = useState(0);
+  const [selectedUserId, setSelectedUserId] = useState(0);
   const [hasUsersError, setHasUsersError] = useState(false);
 
   const [todos, setTodos] = useState<Todo[]>(todosFromServer);
@@ -24,7 +25,7 @@ export const App: React.FC = () => {
   };
 
   const handleUsersChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setUsers(+event.target.value);
+    setSelectedUserId(+event.target.value);
     setHasUsersError(false);
   };
 
@@ -32,27 +33,32 @@ export const App: React.FC = () => {
     event.preventDefault();
 
     setHasTitleError(!title);
-    setHasUsersError(!users);
+    setHasUsersError(!selectedUserId);
 
-    if (!title || !users) {
+    if (!title || !selectedUserId) {
       return;
     }
 
-    const maxId = Math.max(...todos.map(todo => todo.id));
-    const selectedUser = usersFromServer.find(u => u.id === users);
+    const maxId = todos.length ? Math.max(...todos.map(todo => todo.id)) : 0;
+
+    const selectedUser = usersFromServer.find(u => u.id === selectedUserId);
+
+    if (!selectedUser) {
+      return;
+    }
 
     const newTodo = {
       id: maxId + 1,
       title,
       completed: false,
-      userId: users,
+      userId: selectedUserId,
       user: selectedUser,
     };
 
     setTodos(currentTodos => [...currentTodos, newTodo]);
 
     setTitle('');
-    setUsers(0);
+    setSelectedUserId(0);
   };
 
   return (
@@ -93,7 +99,7 @@ export const App: React.FC = () => {
               <select
                 data-cy="userSelect"
                 id="user-select"
-                value={users}
+                value={selectedUserId}
                 onChange={handleUsersChange}
               >
                 <option value="0" disabled>
@@ -122,7 +128,7 @@ export const App: React.FC = () => {
       </form>
 
       <div>
-        <TodoList todos={todos} users={usersFromServer} />
+        <TodoList todos={todos} />
       </div>
     </div>
   );

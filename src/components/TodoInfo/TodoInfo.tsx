@@ -1,12 +1,12 @@
 import React from 'react';
 import { User, UserInfo } from '../UserInfo';
-import { Todo } from '../TodoList';
+import { Todo } from '../../types/Todo';
 
 type Props = {
   todo: Todo & { user?: User };
 };
 
-export const TodoInfo: React.FC<Props> = ({ todo }) => {
+export const TodoInfo: React.FC<Props> = ({ todo }: { todo: Todo }) => {
   return (
     <div
       className={`box TodoInfo ${todo.completed ? 'TodoInfo--completed' : ''}`}
